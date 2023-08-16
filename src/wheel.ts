@@ -1,0 +1,236 @@
+/*
+ * Copyright (C) 2022-2023 AUIOC.ORG
+ * Copyright (C) 2018-2022 PCC-Studio
+ *
+ * This file is part of Wheel of Names.
+ *
+ * Wheel of Names is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License,
+ * or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ */
+
+import { Item, Message, SpinOptions } from './types';
+import { element, recalculateWeights } from './utils';
+
+console.debug('Wheel page');
+
+let ready = false;
+
+let items: Item[] = [];
+
+const body = document.body;
+const wheelBox = element('div', 'wheel-container');
+const wheel = element('div', 'wheel', 'wheel');
+const pointer = element('div', 'pointer');
+const wheelLabel = element('div', 'wheel-label');
+const spinBtn = element('div', 'wheel-center');
+
+let prevRotate = 0;
+let prevRotateOffset = 0;
+let animation: Animation;
+
+function message(message: Message) {
+    window.opener?.postMessage(JSON.stringify(message), location.origin);
+}
+
+function reset() {
+    prevRotate = 0;
+    prevRotateOffset = 0;
+    if (animation) {
+        animation.cancel();
+    }
+}
+
+function clean() {
+    items = [];
+    wheelBox.style.display = 'none';
+
+    wheelLabel.innerHTML = '';
+    wheel.style.background = '#ffffff33';
+    reset();
+}
+
+function update(_items: Item[]) {
+    clean();
+
+    items = recalculateWeights(_items);
+    console.debug('Update', items);
+
+    if (items.length === 0) {
+        wheel.style.background = '#ffffff33';
+        console.warn('no items');
+        return;
+    }
+
+    let rotate = 0;
+    let gradients: string[] = [];
+    let labels: string[] = [];
+    for (let i = 0; i < items.length; i++) {
+        const { label, uiWeight } = items[i];
+
+        const angle = uiWeight * 360;
+        const nextRotate = rotate + angle;
+
+        const hue = `${(360 * (i + 1)) / items.length}`;
+        gradients.push(`hsl(${hue},100%,75%) ${rotate}deg ${nextRotate}deg`);
+
+        const labelRotate = rotate + angle / 2;
+        labels.push(
+            `<div style="transform: rotate(${labelRotate}deg);"><div >${label}</div></div>`
+        );
+
+        rotate = nextRotate;
+    }
+
+    wheel.style.background =
+        'conic-gradient(from 0deg,' + gradients.join(',') + ')';
+    wheelLabel.innerHTML = labels.join('');
+
+    wheelBox.style.display = 'unset';
+}
+
+function spin(options: SpinOptions = {}) {
+    let { targetIndex = undefined } = options;
+    const {
+        duration = 4000,
+        stopPosition = 'random',
+        additionTurns = 5,
+    } = options;
+
+    if (animation) {
+        animation.cancel();
+    }
+
+    if (items.length === 0) {
+        console.warn('no items');
+        return;
+    }
+
+    const random = Math.random();
+
+    if (
+        targetIndex === undefined ||
+        targetIndex < 0 ||
+        targetIndex > items.length - 1
+    ) {
+        targetIndex = 0;
+        let w = 0;
+        for (let i = 0; i < items.length; i++) {
+            w += items[i].weight;
+            if (random <= w) {
+                targetIndex = i;
+                break;
+            }
+        }
+    }
+    const targetItem = items[targetIndex];
+
+    console.log('Result', targetItem.label);
+    message({ type: 'result', data: targetItem });
+
+    let rotateOffset = 0;
+    for (let i = 0; i < targetIndex; i++) {
+        rotateOffset += items[i].uiWeight * 360;
+    }
+    rotateOffset = 360 - rotateOffset;
+
+    switch (stopPosition) {
+        case 'center': {
+            rotateOffset -= (targetItem.uiWeight * 360) / 2;
+            break;
+        }
+        case 'random': {
+            rotateOffset -= targetItem.uiWeight * 360 * Math.random();
+            break;
+        }
+        case 'zero': {
+            break;
+        }
+    }
+
+    const targetRotate =
+        prevRotate +
+        -prevRotateOffset + // 修正回0度位置
+        additionTurns * 360 + // 加整圈数
+        rotateOffset; // 目标位置
+
+    animation = wheel.animate(
+        [
+            { transform: `rotate(${prevRotate}deg)` },
+            { transform: `rotate(${targetRotate}deg)` },
+        ],
+        {
+            duration: duration,
+            direction: 'normal',
+            easing: 'cubic-bezier(0.440, -0.205, 0.000, 1.130)',
+            fill: 'forwards',
+            iterations: 1,
+        }
+    );
+
+    prevRotate = targetRotate;
+    prevRotateOffset = rotateOffset;
+
+    animation.onfinish = (_ev) => {
+        message({ type: 'finished', data: targetItem });
+    };
+}
+spinBtn.addEventListener('click', () => {
+    spin();
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    body.append(wheelBox);
+    wheelBox.append(pointer, spinBtn, wheel);
+    wheelBox.style.display = 'none';
+    wheel.append(wheelLabel);
+    ready = true;
+    message({ type: 'ready' });
+});
+
+window.addEventListener('message', function (event) {
+    if (event.origin !== this.location.origin) {
+        return;
+    }
+    if (!ready) {
+        console.warn('not ready');
+        return;
+    }
+    const message = JSON.parse(event.data) as Message;
+    console.debug('Message', event.data);
+    switch (message.type) {
+        case 'wheel': {
+            console.debug('Update', JSON.parse(JSON.stringify(message.data)));
+            update(message.data);
+            break;
+        }
+        case 'reset': {
+            console.debug('Reset');
+            reset();
+            break;
+        }
+        case 'clean': {
+            console.debug('Clean');
+            clean();
+            break;
+        }
+        case 'spin': {
+            console.debug('Spin');
+            spin(message?.data);
+            break;
+        }
+        default:
+            break;
+    }
+});
+
+export { clean, reset, spin, update };

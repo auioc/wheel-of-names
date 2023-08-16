@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "alwaysStrict": true,
+        "baseUrl": "./src",
+        "lib": ["ESNext", "DOM"],
+        "module": "ESNext",
+        "moduleResolution": "Node10",
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "outDir": "./public",
+        "removeComments": true,
+        "rootDir": "./src",
+        "sourceMap": true,
+        "strictFunctionTypes": true,
+        "target": "ESNext"
+    },
+    "include": ["./src/**/*"]
+}

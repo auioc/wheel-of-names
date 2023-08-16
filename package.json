@@ -1,0 +1,22 @@
+{
+    "name": "wheel-of-names",
+    "version": "1.0.0",
+    "description": "",
+    "type": "module",
+    "main": "index.js",
+    "scripts": {
+        "watch": "rollup --config rollup.config.js --watch"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "packageManager": "pnpm@10.9.0",
+    "devDependencies": {
+        "@rollup/plugin-terser": "^0.4.4",
+        "@rollup/plugin-typescript": "^12.3.0",
+        "rollup": "^4.53.2",
+        "sass": "^1.94.0",
+        "tslib": "^2.8.1",
+        "typescript": "^5.9.3"
+    }
+}
