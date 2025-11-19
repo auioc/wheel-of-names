@@ -27,7 +27,7 @@ export function div(
 ) {
     const el = document.createElement('div');
     if (clazz) {
-        el.classList.add(...(Array.isArray(clazz) ? clazz : [clazz]));
+        el.classList.add(...(Array.isArray(clazz) ? clazz : clazz.split(' ')));
     }
     if (id && ((id = id.trim()), id.length > 0)) {
         el.id = id;

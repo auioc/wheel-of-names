@@ -32,9 +32,9 @@ const wheelBox = div('wheel-container');
 const wheel = div('wheel', 'wheel');
 const pointer = div('pointer');
 const wheelLabel = div('wheel-label');
-const spinBtn = div('wheel-center');
-const resultPopup = div('result-popup');
-const resultLabel = div('result-label');
+const spinBtn = div('wheel-center flex-c');
+const resultPopup = div('result-popup flex-c');
+const resultLabel = div('result-label flex-c');
 
 let prevRotate = 0;
 let prevRotateOffset = 0;
@@ -204,6 +204,7 @@ function spin(options: SpinOptions = {}) {
 
 document.addEventListener('DOMContentLoaded', function () {
     body.append(wheelBox, resultPopup);
+    body.classList.add('flex-c');
     resultPopup.append(resultLabel);
     resetPopup();
     wheelBox.append(pointer, spinBtn, wheel);
