@@ -20,6 +20,10 @@
 
 import { Item } from './types';
 
+export function id(id: string) {
+    return document.getElementById(id);
+}
+
 export function div(
     clazz?: string | string[],
     id?: string,

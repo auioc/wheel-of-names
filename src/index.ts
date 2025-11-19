@@ -19,6 +19,7 @@
  */
 
 import { Item, Message } from './types';
+import { id } from './utils';
 
 let wheelWindow: Window = null;
 let wheelReady = false;
@@ -46,9 +47,15 @@ window.addEventListener('message', function (event) {
     }
 });
 
-function message(message: Message) {
+type SimpleMessage = Exclude<Message, { data: any }>;
+function message(type: SimpleMessage['type']): void;
+function message(message: Message): void;
+function message(o: Message | SimpleMessage['type']) {
+    if (typeof o === 'string') {
+        o = { type: o };
+    }
     if (wheelWindow && !wheelWindow.closed && wheelReady) {
-        wheelWindow.postMessage(JSON.stringify(message), location.origin);
+        wheelWindow.postMessage(JSON.stringify(o), location.origin);
         wheelWindow.focus();
         return;
     }
@@ -79,9 +86,8 @@ function updateWheel(items: Item[]) {
     }
 }
 
-const updateBtn = document.getElementById('update-btn');
-const itemsTextarea = document.getElementById('items');
-updateBtn.addEventListener('click', () => {
+const itemsTextarea = id('items');
+id('update-btn').addEventListener('click', () => {
     openWheelWindow();
     const items: Item[] = (<HTMLTextAreaElement>itemsTextarea).value
         .split('\n')
@@ -108,15 +114,6 @@ updateBtn.addEventListener('click', () => {
     console.debug('Parsed items', items);
     updateWheel(items);
 });
-const spinBtn = document.getElementById('spin-btn');
-spinBtn.addEventListener('click', () => {
-    message({ type: 'spin' });
-});
-const resetBtn = document.getElementById('reset-btn');
-resetBtn.addEventListener('click', () => {
-    message({ type: 'reset' });
-});
-const cleanBtn = document.getElementById('clean-btn');
-cleanBtn.addEventListener('click', () => {
-    message({ type: 'clean' });
-});
+id('spin-btn').addEventListener('click', () => message('spin'));
+id('reset-btn').addEventListener('click', () => message('reset'));
+id('clean-btn').addEventListener('click', () => message('clean'));
