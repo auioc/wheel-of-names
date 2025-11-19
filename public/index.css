@@ -1,3 +1,10 @@
+#items {
+    field-sizing: content;
+    min-height: 8rem;
+    min-width: 24rem;
+    resize: none;
+}
+
 #result-list > li:nth-child(1) {
     list-style-type: disclosure-closed;
 }

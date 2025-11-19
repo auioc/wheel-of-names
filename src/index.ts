@@ -64,10 +64,9 @@ function updateWheel(items: Item[]) {
     }
 }
 
-const itemsTextarea = id('items');
-id('update-btn').addEventListener('click', () => {
-    openWheelWindow();
-    const items: Item[] = (<HTMLTextAreaElement>itemsTextarea).value
+const itemsTextarea = <HTMLTextAreaElement>id('items');
+function parseItems() {
+    return itemsTextarea.value
         .split('\n')
         .map((x) => x.trim())
         .filter((x) => x.length > 0)
@@ -89,6 +88,10 @@ id('update-btn').addEventListener('click', () => {
                     <Item>{}
                 )
         );
+}
+id('update-btn').addEventListener('click', () => {
+    openWheelWindow();
+    const items = parseItems();
     console.debug('Parsed items', items);
     updateWheel(items);
 });
