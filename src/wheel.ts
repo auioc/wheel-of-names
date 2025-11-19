@@ -19,7 +19,7 @@
  */
 
 import { Item, Message, SpinOptions } from './types';
-import { element, recalculateWeights } from './utils';
+import { div, recalculateWeights } from './utils';
 
 console.debug('Wheel page');
 
@@ -28,11 +28,13 @@ let ready = false;
 let items: Item[] = [];
 
 const body = document.body;
-const wheelBox = element('div', 'wheel-container');
-const wheel = element('div', 'wheel', 'wheel');
-const pointer = element('div', 'pointer');
-const wheelLabel = element('div', 'wheel-label');
-const spinBtn = element('div', 'wheel-center');
+const wheelBox = div('wheel-container');
+const wheel = div('wheel', 'wheel');
+const pointer = div('pointer');
+const wheelLabel = div('wheel-label');
+const spinBtn = div('wheel-center');
+const resultPopup = div('result-popup');
+const resultLabel = div('result-label');
 
 let prevRotate = 0;
 let prevRotateOffset = 0;
@@ -42,12 +44,25 @@ function message(message: Message) {
     window.opener?.postMessage(JSON.stringify(message), location.origin);
 }
 
+function resetPopup() {
+    resultPopup.style.visibility = 'hidden';
+    resultPopup.style.opacity = '0';
+    resultLabel.innerHTML = '';
+}
+
+function popupResult(result: Item) {
+    resultPopup.style.visibility = 'unset';
+    resultPopup.style.opacity = '1';
+    resultLabel.innerHTML = `<p>${result.label}</p>`;
+}
+
 function reset() {
     prevRotate = 0;
     prevRotateOffset = 0;
     if (animation) {
         animation.cancel();
     }
+    resetPopup();
 }
 
 function clean() {
@@ -109,6 +124,7 @@ function spin(options: SpinOptions = {}) {
     if (animation) {
         animation.cancel();
     }
+    resetPopup();
 
     if (items.length === 0) {
         console.warn('no items');
@@ -182,14 +198,14 @@ function spin(options: SpinOptions = {}) {
 
     animation.onfinish = (_ev) => {
         message({ type: 'finished', data: targetItem });
+        popupResult(targetItem);
     };
 }
-spinBtn.addEventListener('click', () => {
-    spin();
-});
 
 document.addEventListener('DOMContentLoaded', function () {
-    body.append(wheelBox);
+    body.append(wheelBox, resultPopup);
+    resultPopup.append(resultLabel);
+    resetPopup();
     wheelBox.append(pointer, spinBtn, wheel);
     wheelBox.style.display = 'none';
     wheel.append(wheelLabel);

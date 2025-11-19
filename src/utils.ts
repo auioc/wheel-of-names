@@ -20,13 +20,12 @@
 
 import { Item } from './types';
 
-export function element<K extends keyof HTMLElementTagNameMap>(
-    name?: K,
+export function div(
     clazz?: string | string[],
     id?: string,
-    fn?: (el: HTMLElementTagNameMap[K]) => void
+    fn?: (el: HTMLDivElement) => void
 ) {
-    const el = document.createElement(name ?? <K>'div');
+    const el = document.createElement('div');
     if (clazz) {
         el.classList.add(...(Array.isArray(clazz) ? clazz : [clazz]));
     }

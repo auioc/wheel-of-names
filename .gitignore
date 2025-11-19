@@ -1,6 +1,11 @@
+.vscode
+
 node_modules/
 
 public/*.js
 public/*.map
 
 rollup.config-*.cjs
+
+test/
+build/
