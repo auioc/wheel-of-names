@@ -25,28 +25,6 @@ let wheelWindow: Window = null;
 let wheelReady = false;
 console.debug('Main page');
 
-window.addEventListener('message', function (event) {
-    if (event.origin !== this.location.origin) {
-        return;
-    }
-    const message = JSON.parse(event.data) as Message;
-    switch (message.type) {
-        case 'ready': {
-            if (wheelWindow && !wheelWindow.closed) {
-                console.debug('Ready');
-                wheelReady = true;
-            }
-            break;
-        }
-        case 'finished': {
-            console.info('Result', message.data.label);
-            break;
-        }
-        default:
-            break;
-    }
-});
-
 type SimpleMessage = Exclude<Message, { data: any }>;
 function message(type: SimpleMessage['type']): void;
 function message(message: Message): void;
@@ -117,3 +95,33 @@ id('update-btn').addEventListener('click', () => {
 id('spin-btn').addEventListener('click', () => message('spin'));
 id('reset-btn').addEventListener('click', () => message('reset'));
 id('clean-btn').addEventListener('click', () => message('clean'));
+
+const resultList = id('result-list');
+function addResult(result: Item) {
+    resultList.innerHTML = `<li>${result.label}</li>${resultList.innerHTML}`;
+}
+
+// ========================================================================== //
+
+window.addEventListener('message', function (event) {
+    if (event.origin !== this.location.origin) {
+        return;
+    }
+    const message = JSON.parse(event.data) as Message;
+    switch (message.type) {
+        case 'ready': {
+            if (wheelWindow && !wheelWindow.closed) {
+                console.debug('Ready');
+                wheelReady = true;
+            }
+            break;
+        }
+        case 'result': {
+            console.info('Result', message.data.label);
+            addResult(message.data);
+            break;
+        }
+        default:
+            break;
+    }
+});
