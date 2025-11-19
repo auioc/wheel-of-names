@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022-2023 AUIOC.ORG
+ * Copyright (C) 2022-2025 AUIOC.ORG
  * Copyright (C) 2018-2022 PCC-Studio
  *
  * This file is part of Wheel of Names.
