@@ -18,7 +18,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Item, Message, SpinOptions } from './types';
+import { Item, Message, SimpleMessage, SpinOptions } from './types';
 import { div, recalculateWeights } from './utils';
 
 console.debug('Wheel page');
@@ -40,8 +40,13 @@ let prevRotate = 0;
 let prevRotateOffset = 0;
 let animation: Animation;
 
-function message(message: Message) {
-    window.opener?.postMessage(JSON.stringify(message), location.origin);
+function message(type: SimpleMessage): void;
+function message(message: Message): void;
+function message(o: Message | SimpleMessage) {
+    if (typeof o === 'string') {
+        o = { type: o };
+    }
+    window.opener?.postMessage(JSON.stringify(o), location.origin);
 }
 
 function resetPopup() {
@@ -57,12 +62,14 @@ function popupResult(result: Item) {
 }
 
 function reset() {
+    ready = false;
     prevRotate = 0;
     prevRotateOffset = 0;
     if (animation) {
         animation.cancel();
     }
     resetPopup();
+    ready = true;
 }
 
 function clean() {
@@ -72,6 +79,7 @@ function clean() {
     wheelLabel.innerHTML = '';
     wheel.style.background = '#ffffff33';
     reset();
+    ready = false;
 }
 
 function update(_items: Item[]) {
@@ -83,6 +91,8 @@ function update(_items: Item[]) {
     if (items.length === 0) {
         wheel.style.background = '#ffffff33';
         console.warn('no items');
+        ready = false;
+        message('clean');
         return;
     }
 
@@ -111,6 +121,9 @@ function update(_items: Item[]) {
     wheelLabel.innerHTML = labels.join('');
 
     wheelBox.style.display = 'unset';
+
+    ready = true;
+    message('ready');
 }
 
 function spin(options: SpinOptions = {}) {
@@ -210,39 +223,41 @@ document.addEventListener('DOMContentLoaded', function () {
     wheelBox.append(pointer, spinBtn, wheel);
     wheelBox.style.display = 'none';
     wheel.append(wheelLabel);
-    ready = true;
-    message({ type: 'ready' });
+    clean();
+    message('loaded');
 });
 
 window.addEventListener('message', function (event) {
     if (event.origin !== this.location.origin) {
         return;
     }
-    if (!ready) {
-        console.warn('not ready');
-        return;
-    }
-    const message = JSON.parse(event.data) as Message;
+    const msg = JSON.parse(event.data) as Message;
     console.debug('Message', event.data);
-    switch (message.type) {
+    switch (msg.type) {
         case 'wheel': {
-            console.debug('Update', JSON.parse(JSON.stringify(message.data)));
-            update(message.data);
+            console.debug('Update', JSON.parse(JSON.stringify(msg.data)));
+            update(msg.data);
             break;
         }
         case 'reset': {
             console.debug('Reset');
             reset();
+            message('ready');
             break;
         }
         case 'clean': {
             console.debug('Clean');
             clean();
+            message('clean');
             break;
         }
         case 'spin': {
+            if (!ready) {
+                console.warn('not ready');
+                break;
+            }
             console.debug('Spin');
-            spin(message?.data);
+            spin(msg?.data);
             break;
         }
         default:

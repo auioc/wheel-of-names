@@ -3,8 +3,13 @@
     min-height: 8rem;
     min-width: 24rem;
     resize: none;
+    font-family: monospace;
 }
 
 #result-list > li:nth-child(1) {
     list-style-type: disclosure-closed;
+}
+
+#status {
+    font-family: monospace;
 }

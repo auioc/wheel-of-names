@@ -18,21 +18,21 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Item, Message } from './types';
+import { Item, Message, SimpleMessage } from './types';
 import { id } from './utils';
 
 let wheelWindow: Window = null;
 let wheelReady = false;
+let wheelLoaded = false;
 console.debug('Main page');
 
-type SimpleMessage = Exclude<Message, { data: any }>;
-function message(type: SimpleMessage['type']): void;
+function message(type: SimpleMessage): void;
 function message(message: Message): void;
-function message(o: Message | SimpleMessage['type']) {
+function message(o: Message | SimpleMessage) {
     if (typeof o === 'string') {
         o = { type: o };
     }
-    if (wheelWindow && !wheelWindow.closed && wheelReady) {
+    if (wheelWindow && !wheelWindow.closed && wheelLoaded) {
         wheelWindow.postMessage(JSON.stringify(o), location.origin);
         wheelWindow.focus();
         return;
@@ -43,7 +43,7 @@ function message(o: Message | SimpleMessage['type']) {
 function openWheelWindow() {
     if (wheelWindow && !wheelWindow.closed) {
     } else {
-        wheelReady = false;
+        wheelLoaded = false;
         wheelWindow = window.open(
             `wheel.html`,
             'Wheel',
@@ -56,7 +56,7 @@ function openWheelWindow() {
 function updateWheel(items: Item[]) {
     if (wheelWindow && !wheelWindow.closed) {
         const i = setInterval(() => {
-            if (wheelReady) {
+            if (wheelLoaded) {
                 clearInterval(i);
                 message({ type: 'wheel', data: items });
             }
@@ -95,7 +95,12 @@ id('update-btn').addEventListener('click', () => {
     console.debug('Parsed items', items);
     updateWheel(items);
 });
-id('spin-btn').addEventListener('click', () => message('spin'));
+id('spin-btn').addEventListener('click', () => {
+    if (wheelReady) {
+        message('spin');
+        statusLabel.innerText = 'Spinning...';
+    }
+});
 id('reset-btn').addEventListener('click', () => message('reset'));
 id('clean-btn').addEventListener('click', () => message('clean'));
 
@@ -104,24 +109,43 @@ function addResult(result: Item) {
     resultList.innerHTML = `<li>${result.label}</li>${resultList.innerHTML}`;
 }
 
+const statusLabel = id('status');
+
 // ========================================================================== //
 
 window.addEventListener('message', function (event) {
     if (event.origin !== this.location.origin) {
         return;
     }
-    const message = JSON.parse(event.data) as Message;
-    switch (message.type) {
-        case 'ready': {
+    const msg = JSON.parse(event.data) as Message;
+    switch (msg.type) {
+        case 'loaded': {
             if (wheelWindow && !wheelWindow.closed) {
-                console.debug('Ready');
-                wheelReady = true;
+                console.debug('Loaded');
+                wheelLoaded = true;
+                statusLabel.innerText = 'Loaded';
             }
             break;
         }
+        case 'ready': {
+            console.debug('Ready');
+            wheelReady = true;
+            statusLabel.innerText = 'Ready';
+            break;
+        }
         case 'result': {
-            console.info('Result', message.data.label);
-            addResult(message.data);
+            console.info('Result', msg.data.label);
+            addResult(msg.data);
+            break;
+        }
+        case 'finished': {
+            statusLabel.innerText = 'Finished';
+            break;
+        }
+        case 'clean': {
+            console.debug('Clean');
+            wheelReady = false;
+            statusLabel.innerText = 'Not ready yet';
             break;
         }
         default:

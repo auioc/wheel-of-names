@@ -25,6 +25,7 @@ export interface Item {
 }
 
 export type Message =
+    | { type: 'loaded' }
     | { type: 'ready' }
     | { type: 'wheel'; data: Item[] }
     | { type: 'spin'; data?: SpinOptions }
@@ -32,6 +33,8 @@ export type Message =
     | { type: 'clean' }
     | { type: 'result'; data: Item }
     | { type: 'finished'; data: Item };
+
+export type SimpleMessage = Exclude<Message, { data: any }>['type'];
 
 export interface SpinOptions {
     targetIndex?: number;
