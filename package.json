@@ -6,8 +6,8 @@
     "main": "index.js",
     "scripts": {
         "watch": "rollup --config rollup.config.js --watch",
-        "prod:script": "cross-env NODE_ENV=production rollup --config rollup.config.js",
-        "dev:script": "cross-env NODE_ENV=development rollup --config rollup.config.js"
+        "build:prod": "cross-env NODE_ENV=production rollup --config rollup.config.js",
+        "build:dev": "cross-env NODE_ENV=development rollup --config rollup.config.js"
     },
     "keywords": [],
     "author": "",
