@@ -18,6 +18,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import './index.css';
 import { Item, Message, SimpleMessage } from './types';
 import { id } from './utils';
 

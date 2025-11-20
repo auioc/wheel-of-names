@@ -20,6 +20,7 @@
 
 import { Item, Message, SimpleMessage, SpinOptions } from './types';
 import { div, recalculateWeights } from './utils';
+import './wheel.css';
 
 console.debug('Wheel page');
 
