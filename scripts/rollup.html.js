@@ -9,7 +9,7 @@ const TERSER_OPTIONS = {
     removeComments: true,
 };
 
-export async function template(
+export default async function template(
     /** @type {string} */ src,
     /** @type {boolean} */ dev,
     /** @type {import('@rollup/plugin-html').RollupHtmlTemplateOptions}*/ opts

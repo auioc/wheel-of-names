@@ -4,8 +4,9 @@ import html from '@rollup/plugin-html';
 import postcss from 'rollup-plugin-postcss';
 import license from 'rollup-plugin-license';
 import moment from 'moment';
-import { template as htmlTemplate } from './scripts/rollup.html.js';
+import htmlTemplate from './scripts/rollup.html.js';
 import { version, cssComment } from './scripts/rollup.utils.js';
+import watch from './scripts/rollup.watch.js';
 
 const dev = process.env.NODE_ENV !== 'production';
 
@@ -65,6 +66,22 @@ const plugins = () => {
     return plugins;
 };
 
+/**
+ *
+ * @param {string} src
+ * @param {string} output
+ * @returns {Array<import('rollup').Plugin>}
+ */
+function htmlPlugin(src, output) {
+    return [
+        html({
+            fileName: output,
+            template: (opts) => htmlTemplate(src, dev, opts),
+        }),
+        watch(src),
+    ];
+}
+
 export default [
     {
         input: 'src/index.ts',
@@ -77,13 +94,7 @@ export default [
             },
         ],
         context: 'window',
-        plugins: [
-            ...plugins(),
-            html({
-                fileName: 'index.html',
-                template: (opts) => htmlTemplate('src/index.html', dev, opts),
-            }),
-        ],
+        plugins: [...plugins(), ...htmlPlugin('src/index.html', 'index.html')],
     },
     {
         input: 'src/wheel.ts',
@@ -96,12 +107,6 @@ export default [
             },
         ],
         context: 'window',
-        plugins: [
-            ...plugins(),
-            html({
-                fileName: 'wheel.html',
-                template: (opts) => htmlTemplate('src/wheel.html', dev, opts),
-            }),
-        ],
+        plugins: [...plugins(), ...htmlPlugin('src/wheel.html', 'wheel.html')],
     },
 ];
