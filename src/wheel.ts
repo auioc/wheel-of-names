@@ -243,6 +243,7 @@ window.addEventListener('message', function (event) {
         case 'reset': {
             console.debug('Reset');
             reset();
+            message('reset');
             message('ready');
             break;
         }
