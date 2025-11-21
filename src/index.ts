@@ -54,6 +54,12 @@ function openWheelWindow() {
     wheelWindow.focus();
 }
 
+let items: Item[] = [];
+let lastResult: Item;
+const itemsTextarea = <HTMLTextAreaElement>id('items');
+const spinBtn = <HTMLButtonElement>id('spin-btn');
+const removeBtn = <HTMLButtonElement>id('remove-btn');
+
 function updateWheel(items: Item[]) {
     if (wheelWindow && !wheelWindow.closed) {
         const i = setInterval(() => {
@@ -65,7 +71,6 @@ function updateWheel(items: Item[]) {
     }
 }
 
-const itemsTextarea = <HTMLTextAreaElement>id('items');
 function parseItems() {
     return itemsTextarea.value
         .split('\n')
@@ -92,23 +97,37 @@ function parseItems() {
 }
 id('update-btn').addEventListener('click', () => {
     openWheelWindow();
-    const items = parseItems();
-    console.debug('Parsed items', items);
-    updateWheel(items);
+    const parsed = parseItems();
+    items = parsed;
+    console.debug('Parsed items', parsed);
+    updateWheel(parsed);
 });
-id('spin-btn').addEventListener('click', () => {
+
+function spin() {
+    // TODO spin options
     if (wheelReady) {
         message('spin');
         statusLabel.innerText = 'Spinning...';
     }
-});
+}
+spinBtn.addEventListener('click', () => spin());
+
 id('reset-btn').addEventListener('click', () => message('reset'));
 id('clean-btn').addEventListener('click', () => message('clean'));
 
 const resultList = id('result-list');
 function addResult(result: Item) {
+    lastResult = result;
     resultList.innerHTML = `<li>${result.label}</li>${resultList.innerHTML}`;
 }
+
+function removeLastResult() {
+    resultList.children.item(0).classList.add('removed');
+    items = items.filter((x) => x.label !== lastResult.label);
+    lastResult = undefined;
+    updateWheel(items);
+}
+removeBtn.addEventListener('click', () => removeLastResult());
 
 const statusLabel = id('status');
 

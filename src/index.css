@@ -10,6 +10,10 @@
     list-style-type: disclosure-closed;
 }
 
+#result-list > li.removed {
+    text-decoration: line-through;
+}
+
 #status {
     font-family: monospace;
 }
