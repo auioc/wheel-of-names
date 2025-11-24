@@ -190,10 +190,10 @@ window.addEventListener('message', function (event) {
         case 'clean': {
             console.debug('Clean');
             wheelReady = false;
+            reset();
             statusLabel.innerText = 'Not ready yet';
             spinBtn.disabled = true;
             resetBtn.disabled = true;
-            reset();
             items = [];
             break;
         }

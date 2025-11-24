@@ -3,7 +3,8 @@ body {
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
-    margin: 0;
+    margin: 0px auto;
+    width: fit-content;
 }
 
 #items {
@@ -14,12 +15,20 @@ body {
     font-family: monospace;
 }
 
+#result-list {
+    width: 100%;
+}
+
 #result-list > li:nth-child(1) {
     list-style-type: disclosure-closed;
 }
 
 #result-list > li.removed {
     text-decoration: line-through;
+}
+
+#controls {
+    text-align: center;
 }
 
 #status {
