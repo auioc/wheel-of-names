@@ -217,7 +217,7 @@ function spin(options: SpinOptions = {}) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    body.append(wheelBox, resultPopup);
+    body.prepend(wheelBox, resultPopup);
     body.classList.add('flex-c');
     resultPopup.append(resultLabel);
     resetPopup();
@@ -266,4 +266,12 @@ window.addEventListener('message', function (event) {
     }
 });
 
-export { clean, reset, spin, update };
+/**
+ * This field will be automatically replaced to
+ * current version text during build.
+ * Do not modify it!
+ **/
+// @ts-expect-error
+const version = _version_;
+
+export { clean, reset, spin, update, version };

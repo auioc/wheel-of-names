@@ -6,6 +6,20 @@ const execSync = (cmd) => _execSync(cmd).toString().trim();
 const commitHash = () => execSync('git rev-parse --verify HEAD');
 const branch = () => execSync('git branch --show-current');
 const isDirty = () => execSync('git status --short').length !== 0;
+
+/**
+ * @typedef {Object} Version
+ * @property {string} branch
+ * @property {string} commit
+ * @property {boolean} dirty
+ * @property {boolean} dev
+ * @property {string} text
+ *
+ */
+
+/**
+ * @returns {Version}
+ */
 export function version() {
     const r = {
         branch: branch(),
