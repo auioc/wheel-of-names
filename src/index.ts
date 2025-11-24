@@ -57,8 +57,16 @@ function openWheelWindow() {
 let items: Item[] = [];
 let lastResult: Item;
 const itemsTextarea = <HTMLTextAreaElement>id('items');
+const updateBtn = <HTMLButtonElement>id('update-btn');
 const spinBtn = <HTMLButtonElement>id('spin-btn');
 const removeBtn = <HTMLButtonElement>id('remove-btn');
+const resetBtn = <HTMLButtonElement>id('reset-btn');
+const cleanBtn = <HTMLButtonElement>id('clean-btn');
+spinBtn.disabled = true;
+removeBtn.disabled = true;
+resetBtn.disabled = true;
+cleanBtn.disabled = true;
+const statusLabel = id('status');
 
 function updateWheel(items: Item[]) {
     if (wheelWindow && !wheelWindow.closed) {
@@ -95,7 +103,7 @@ function parseItems() {
                 )
         );
 }
-id('update-btn').addEventListener('click', () => {
+updateBtn.addEventListener('click', () => {
     openWheelWindow();
     const parsed = parseItems();
     items = parsed;
@@ -108,12 +116,21 @@ function spin() {
     if (wheelReady) {
         message('spin');
         statusLabel.innerText = 'Spinning...';
+        spinBtn.disabled = true;
+        removeBtn.disabled = true;
     }
 }
 spinBtn.addEventListener('click', () => spin());
 
-id('reset-btn').addEventListener('click', () => message('reset'));
-id('clean-btn').addEventListener('click', () => message('clean'));
+function reset() {
+    statusLabel.innerText = 'Reset...';
+    removeBtn.disabled = true;
+    resultList.innerHTML = '';
+    lastResult = undefined;
+}
+
+resetBtn.addEventListener('click', () => message('reset'));
+cleanBtn.addEventListener('click', () => message('clean'));
 
 const resultList = id('result-list');
 function addResult(result: Item) {
@@ -125,11 +142,10 @@ function removeLastResult() {
     resultList.children.item(0).classList.add('removed');
     items = items.filter((x) => x.label !== lastResult.label);
     lastResult = undefined;
+    removeBtn.disabled = true;
     updateWheel(items);
 }
 removeBtn.addEventListener('click', () => removeLastResult());
-
-const statusLabel = id('status');
 
 // ========================================================================== //
 
@@ -151,6 +167,9 @@ window.addEventListener('message', function (event) {
             console.debug('Ready');
             wheelReady = true;
             statusLabel.innerText = 'Ready';
+            spinBtn.disabled = false;
+            resetBtn.disabled = false;
+            cleanBtn.disabled = false;
             break;
         }
         case 'result': {
@@ -160,12 +179,22 @@ window.addEventListener('message', function (event) {
         }
         case 'finished': {
             statusLabel.innerText = 'Finished';
+            spinBtn.disabled = false;
+            removeBtn.disabled = false;
             break;
+        }
+        case 'reset': {
+            console.debug('Reset');
+            reset();
         }
         case 'clean': {
             console.debug('Clean');
             wheelReady = false;
             statusLabel.innerText = 'Not ready yet';
+            spinBtn.disabled = true;
+            resetBtn.disabled = true;
+            reset();
+            items = [];
             break;
         }
         default:
