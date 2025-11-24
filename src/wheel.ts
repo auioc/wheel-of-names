@@ -217,7 +217,7 @@ function spin(options: SpinOptions = {}) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    body.append(wheelBox, resultPopup);
+    body.prepend(wheelBox, resultPopup);
     body.classList.add('flex-c');
     resultPopup.append(resultLabel);
     resetPopup();

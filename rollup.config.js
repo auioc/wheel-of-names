@@ -87,7 +87,7 @@ function htmlPlugin(src, output) {
     return [
         html({
             fileName: output,
-            template: (opts) => htmlTemplate(src, dev, opts),
+            template: (opts) => htmlTemplate(src, ver, opts),
         }),
         watch(src),
     ];
