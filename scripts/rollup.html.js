@@ -17,7 +17,7 @@ function footer(/** @type {import('./rollup.utils').Version} */ ver) {
     return `
 <a target="_blank" href="${github}">GitHub</a>\
 <span>&nbsp;&middot;&nbsp;</span>\
-<a target="_blank" href="${github}${ver.dirty ? '' : `/tree/${v.commit}`}">\
+<a target="_blank" href="${github}${ver.dirty ? '' : `/tree/${ver.commit}`}">\
 ${ver.text}</a>\
 <br />\
 <span>(C)&nbsp;${year}&nbsp;AUIOC.ORG&nbsp;&middot;&nbsp;Licensed under&nbsp;</span>\
