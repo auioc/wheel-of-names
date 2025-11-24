@@ -172,3 +172,13 @@ window.addEventListener('message', function (event) {
             break;
     }
 });
+
+/**
+ * This field will be automatically replaced to
+ * current version text during build.
+ * Do not modify it!
+ **/
+// @ts-expect-error
+const version = _version_;
+
+export { version };

@@ -1,6 +1,7 @@
 import typescript from '@rollup/plugin-typescript';
 import terser from '@rollup/plugin-terser';
 import html from '@rollup/plugin-html';
+import replace from '@rollup/plugin-replace';
 import postcss from 'rollup-plugin-postcss';
 import license from 'rollup-plugin-license';
 import moment from 'moment';
@@ -27,6 +28,16 @@ Copyright (C) 2018-2022 PCC-Studio
 Licensed under GNU Affero General Public License v3.0
 (https://github.com/auioc/wheel-of-names/blob/main/LICENSE)
 `.trim();
+
+const replacePlugin = (input) =>
+    replace({
+        include: input,
+        // (!) [plugin replace] @rollup/plugin-replace: 'preventAssignment' currently defaults to false. It is recommended to set this option to `true`, as the next major version will default this option to `true`.
+        preventAssignment: true,
+        values: {
+            _version_: JSON.stringify(ver) + ';',
+        },
+    });
 
 const plugins = () => {
     const plugins = [
@@ -94,7 +105,11 @@ export default [
             },
         ],
         context: 'window',
-        plugins: [...plugins(), ...htmlPlugin('src/index.html', 'index.html')],
+        plugins: [
+            ...plugins(),
+            replacePlugin('src/index.ts'),
+            ...htmlPlugin('src/index.html', 'index.html'),
+        ],
     },
     {
         input: 'src/wheel.ts',
@@ -107,6 +122,10 @@ export default [
             },
         ],
         context: 'window',
-        plugins: [...plugins(), ...htmlPlugin('src/wheel.html', 'wheel.html')],
+        plugins: [
+            ...plugins(),
+            replacePlugin('src/wheel.ts'),
+            ...htmlPlugin('src/wheel.html', 'wheel.html'),
+        ],
     },
 ];
