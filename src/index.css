@@ -8,11 +8,39 @@ body {
 }
 
 #items {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    flex-wrap: nowrap;
+    gap: 1em;
+}
+
+#item-input {
     field-sizing: content;
     min-height: 8rem;
     min-width: 24rem;
     resize: none;
     font-family: monospace;
+}
+
+#item-table {
+    line-height: 1;
+    font-family: monospace;
+    border-collapse: collapse;
+    display: none;
+}
+
+#item-table:has(tbody > tr) {
+    display: unset;
+}
+
+#item-table > thead th {
+    padding: 0 0.5em 4px 0.5em;
+}
+
+#item-list td {
+    padding: 0;
+    text-align: center;
 }
 
 #result-list {

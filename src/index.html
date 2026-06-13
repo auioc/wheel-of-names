@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
@@ -8,7 +8,19 @@
     </head>
     <body>
         <h1>Wheel of Names</h1>
-        <textarea id="items" placeholder="&lt;Item Label&gt;[, Weight][, Display Weight]"></textarea>
+        <div id="items">
+            <textarea id="item-input" placeholder="&lt;Item Label&gt;[, Weight][, Display Weight]"></textarea>
+            <table id="item-table">
+                <thead>
+                    <tr>
+                        <th>Check</th>
+                        <th>Weight</th>
+                        <th>Label</th>
+                    </tr>
+                </thead>
+                <tbody id="item-list"></tbody>
+            </table>
+        </div>
         <div id="controls">
             <span id="status"></span>
             <br />

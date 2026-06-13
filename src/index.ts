@@ -20,7 +20,7 @@
 
 import './index.css';
 import { Item, Message, SimpleMessage } from './types';
-import { id } from './utils';
+import { id, recalculateWeights } from './utils';
 
 let wheelWindow: Window = null;
 let wheelReady = false;
@@ -54,9 +54,11 @@ function openWheelWindow() {
     wheelWindow.focus();
 }
 
-let items: Item[] = [];
+let _ITEMS_: Item[] = [];
+let _TARGET_INDEX_: number = -1;
 let lastResult: Item;
-const itemsTextarea = <HTMLTextAreaElement>id('items');
+const inputTextarea = <HTMLTextAreaElement>id('item-input');
+const itemsList = <HTMLTableSectionElement>id('item-list');
 const updateBtn = <HTMLButtonElement>id('update-btn');
 const spinBtn = <HTMLButtonElement>id('spin-btn');
 const removeBtn = <HTMLButtonElement>id('remove-btn');
@@ -67,6 +69,30 @@ removeBtn.disabled = true;
 resetBtn.disabled = true;
 cleanBtn.disabled = true;
 const statusLabel = id('status');
+
+function updateList(items: Item[]) {
+    items = recalculateWeights(items);
+    itemsList.innerHTML = '';
+    items.forEach((x, i) => {
+        const el = document.createElement('tr');
+        el.innerHTML = `<td><input type="radio" name="item" value="${i}" id="index${i}"/></td><td>${(x.weight * 100).toFixed(2)}%</td><td><label for="index${i}">${x.label}</label></td>`;
+        itemsList.appendChild(el);
+    });
+    itemsList.querySelectorAll("input[type='radio']").forEach((el) => {
+        const radio = <HTMLInputElement>el;
+        radio.addEventListener('change', () => {
+            _TARGET_INDEX_ = parseInt(radio.value);
+            console.debug('Set target index', _TARGET_INDEX_);
+        });
+        radio.addEventListener('click', () => {
+            if (_TARGET_INDEX_ === parseInt(radio.value)) {
+                radio.checked = false;
+                _TARGET_INDEX_ = -1;
+                console.debug('Clear target index');
+            }
+        });
+    });
+}
 
 function updateWheel(items: Item[]) {
     if (wheelWindow && !wheelWindow.closed) {
@@ -79,8 +105,15 @@ function updateWheel(items: Item[]) {
     }
 }
 
+function update(items: Item[]) {
+    _ITEMS_ = items;
+    _TARGET_INDEX_ = -1;
+    updateList(items);
+    updateWheel(items);
+}
+
 function parseItems() {
-    return itemsTextarea.value
+    return inputTextarea.value
         .split('\n')
         .map((x) => x.trim())
         .filter((x) => x.length > 0)
@@ -106,15 +139,17 @@ function parseItems() {
 updateBtn.addEventListener('click', () => {
     openWheelWindow();
     const parsed = parseItems();
-    items = parsed;
+    _ITEMS_ = parsed;
     console.debug('Parsed items', parsed);
-    updateWheel(parsed);
+    update(parsed);
 });
 
 function spin() {
-    // TODO spin options
     if (wheelReady) {
-        message('spin');
+        message({
+            type: 'spin',
+            data: { targetIndex: _TARGET_INDEX_ },
+        });
         statusLabel.innerText = 'Spinning...';
         spinBtn.disabled = true;
         removeBtn.disabled = true;
@@ -127,6 +162,8 @@ function reset() {
     removeBtn.disabled = true;
     resultList.innerHTML = '';
     lastResult = undefined;
+    _TARGET_INDEX_ = -1;
+    updateList(_ITEMS_);
 }
 
 resetBtn.addEventListener('click', () => message('reset'));
@@ -140,10 +177,10 @@ function addResult(result: Item) {
 
 function removeLastResult() {
     resultList.children.item(0).classList.add('removed');
-    items = items.filter((x) => x.label !== lastResult.label);
+    _ITEMS_ = _ITEMS_.filter((x) => x.label !== lastResult.label);
     lastResult = undefined;
     removeBtn.disabled = true;
-    updateWheel(items);
+    update(_ITEMS_);
 }
 removeBtn.addEventListener('click', () => removeLastResult());
 
@@ -194,7 +231,7 @@ window.addEventListener('message', function (event) {
             statusLabel.innerText = 'Not ready yet';
             spinBtn.disabled = true;
             resetBtn.disabled = true;
-            items = [];
+            _ITEMS_ = [];
             break;
         }
         default:
