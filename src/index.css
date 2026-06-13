@@ -43,6 +43,20 @@ body {
     text-align: center;
 }
 
+#item-list td:nth-child(2)::before {
+    content: attr(data-value);
+}
+
+#item-list:has(input:checked) td:nth-child(2)::before {
+    content: '0%';
+    opacity: 0.2;
+}
+
+#item-list tr:has(input:checked) td:nth-child(2)::before {
+    content: '100%';
+    opacity: 1;
+}
+
 #result-list {
     width: 100%;
 }

@@ -75,7 +75,7 @@ function updateList(items: Item[]) {
     itemsList.innerHTML = '';
     items.forEach((x, i) => {
         const el = document.createElement('tr');
-        el.innerHTML = `<td><input type="radio" name="item" value="${i}" id="index${i}"/></td><td>${(x.weight * 100).toFixed(2)}%</td><td><label for="index${i}">${x.label}</label></td>`;
+        el.innerHTML = `<td><input type="radio" name="item" value="${i}" id="index${i}"/></td><td data-value="${(x.weight * 100).toFixed(2)}%"></td><td><label for="index${i}">${x.label}</label></td>`;
         itemsList.appendChild(el);
     });
     itemsList.querySelectorAll("input[type='radio']").forEach((el) => {
