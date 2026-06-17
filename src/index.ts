@@ -50,6 +50,15 @@ function openWheelWindow() {
             'Wheel',
             `popup=yes,width=600,height=650`
         );
+        if (!wheelWindow) {
+            alert('Failed to open wheel window!');
+            return;
+        }
+        wheelWindow.addEventListener('unload', () => {
+            if (wheelLoaded) {
+                window.postMessage(JSON.stringify({ type: 'unload' }));
+            }
+        });
     }
     wheelWindow.focus();
 }
@@ -166,8 +175,21 @@ function reset() {
     updateList(_ITEMS_);
 }
 
+function clean() {
+    wheelReady = false;
+    _ITEMS_ = [];
+    reset();
+    statusLabel.innerText = '';
+    spinBtn.disabled = true;
+    resetBtn.disabled = true;
+    removeBtn.disabled = true;
+}
+
 resetBtn.addEventListener('click', () => message('reset'));
-cleanBtn.addEventListener('click', () => message('clean'));
+cleanBtn.addEventListener('click', () => {
+    wheelWindow?.close();
+    location.reload();
+});
 
 const resultList = id('result-list');
 function addResult(result: Item) {
@@ -196,7 +218,10 @@ window.addEventListener('message', function (event) {
             if (wheelWindow && !wheelWindow.closed) {
                 console.debug('Loaded');
                 wheelLoaded = true;
-                statusLabel.innerText = 'Loaded';
+                wheelReady = false;
+                statusLabel.innerText = 'Not ready yet';
+                spinBtn.disabled = true;
+                resetBtn.disabled = true;
             }
             break;
         }
@@ -207,6 +232,11 @@ window.addEventListener('message', function (event) {
             spinBtn.disabled = false;
             resetBtn.disabled = false;
             cleanBtn.disabled = false;
+            break;
+        }
+        case 'unload': {
+            console.debug('Unload');
+            clean();
             break;
         }
         case 'result': {
@@ -223,15 +253,6 @@ window.addEventListener('message', function (event) {
         case 'reset': {
             console.debug('Reset');
             reset();
-        }
-        case 'clean': {
-            console.debug('Clean');
-            wheelReady = false;
-            reset();
-            statusLabel.innerText = 'Not ready yet';
-            spinBtn.disabled = true;
-            resetBtn.disabled = true;
-            _ITEMS_ = [];
             break;
         }
         default:

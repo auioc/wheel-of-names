@@ -27,6 +27,7 @@ export interface Item {
 export type Message =
     | { type: 'loaded' }
     | { type: 'ready' }
+    | { type: 'unload' }
     | { type: 'wheel'; data: Item[] }
     | { type: 'spin'; data?: SpinOptions }
     | { type: 'reset' }
