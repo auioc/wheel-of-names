@@ -42,4 +42,5 @@ export interface SpinOptions {
     duration?: number;
     stopPosition?: 'zero' | 'center' | 'random';
     additionTurns?: number;
+    resultPopup?: boolean;
 }

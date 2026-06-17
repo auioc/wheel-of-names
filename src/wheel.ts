@@ -133,6 +133,7 @@ function spin(options: SpinOptions = {}) {
         duration = 4000,
         stopPosition = 'random',
         additionTurns = 5,
+        resultPopup: popupOn,
     } = options;
 
     if (animation) {
@@ -212,7 +213,9 @@ function spin(options: SpinOptions = {}) {
 
     animation.onfinish = (_ev) => {
         message({ type: 'finished', data: targetItem });
-        popupResult(targetItem);
+        if (popupOn) {
+            popupResult(targetItem);
+        }
     };
 }
 
