@@ -157,7 +157,19 @@ function spin() {
     if (wheelReady) {
         message({
             type: 'spin',
-            data: { targetIndex: _TARGET_INDEX_ },
+            data: {
+                targetIndex: _TARGET_INDEX_,
+                duration:
+                    parseInt((<HTMLInputElement>id('duration-input')).value) *
+                    1000,
+                additionTurns: parseInt(
+                    (<HTMLInputElement>id('turns-input')).value
+                ),
+                stopPosition: (<HTMLSelectElement>id('stopposition-select'))
+                    .value as any,
+                resultPopup: (<HTMLInputElement>id('resultpopup-check'))
+                    .checked,
+            },
         });
         statusLabel.innerText = 'Spinning...';
         spinBtn.disabled = true;
@@ -222,6 +234,7 @@ window.addEventListener('message', function (event) {
                 statusLabel.innerText = 'Not ready yet';
                 spinBtn.disabled = true;
                 resetBtn.disabled = true;
+                removeBtn.disabled = true;
             }
             break;
         }
